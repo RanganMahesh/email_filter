@@ -37,10 +37,14 @@ def apply_actions(access_token, email_id, actions):
         }
 
         for action in actions:
-            if action == 'mark_as_read':
-                data = {'removeLabelIds': ['UNREAD']}
-            elif action == 'move_to_inbox':
-                data = {'addLabelIds': ['INBOX']}
+            data = {}
+            if action.startswith('mark_as'):
+                if action.split('_')[-1].upper() == 'READ':
+                    data = {'removeLabelIds': ['UNREAD']}
+                else:
+                    data = {'addLabelIds': ['UNREAD']}
+            elif action.startswith('move_to'):
+                data = {'addLabelIds': [action.split('_')[-1].upper()]}
 
             response = requests.post(f'https://www.googleapis.com/gmail/v1/users/me/messages/{email_id}/modify',
                                      headers=headers, json=data)

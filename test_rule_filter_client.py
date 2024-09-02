@@ -195,7 +195,7 @@ class TestApplyActions(unittest.TestCase):
         mock_print.assert_called_once_with("Failed to execute action: API Error")
 
 
-class TestMatchRules(unittest.TestCase):
+class TestApplyRules(unittest.TestCase):
 
     @patch('rule_filter_client.authenticate_gmail_api')
     @patch('rule_filter_client.open', new_callable=mock_open, read_data='[{"conditions": {"match": "all", "rules": []}, "actions": []}]')

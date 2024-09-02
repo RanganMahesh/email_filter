@@ -5,9 +5,9 @@
             "rules": [
                 {"field": "from", "predicate": "contains", "value": "Reddit"},
                 {"field": "subject", "predicate": "contains", "value": "Interview"},
-                {"field": "received_at", "predicate": "is_less_than", "value": "1month"}
+                {"field": "received_at", "predicate": "is_less_than", "value": "5days"}
             ]
         },
-        "actions": ["mark_as_read", "move_to_inbox"]
+        "actions": ["mark_as_unread", "move_to_starred"]
     }
 ]

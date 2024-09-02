@@ -162,6 +162,17 @@ class TestApplyActions(unittest.TestCase):
             body={'removeLabelIds': ['UNREAD']}
         )
 
+    def test_mark_as_unread(self):
+        mock_service = MagicMock()
+
+        apply_actions(mock_service, 'test_email_id', ['mark_as_unread'])
+
+        mock_service.users().messages().modify.assert_called_once_with(
+            userId='me',
+            id='test_email_id',
+            body={'addLabelIds': ['UNREAD']}
+        )
+
     def test_move_to_inbox(self):
         mock_service = MagicMock()
 
@@ -184,7 +195,7 @@ class TestApplyActions(unittest.TestCase):
         mock_print.assert_called_once_with("Failed to execute action: API Error")
 
 
-class TestApplyRules(unittest.TestCase):
+class TestMatchRules(unittest.TestCase):
 
     @patch('rule_filter_client.authenticate_gmail_api')
     @patch('rule_filter_client.open', new_callable=mock_open, read_data='[{"conditions": {"match": "all", "rules": []}, "actions": []}]')
@@ -222,7 +233,7 @@ class TestApplyRules(unittest.TestCase):
 
         apply_rules()
 
-        self.assertEqual(mock_match_rule.call_count, 2 * 1)  # 2 rows * 1 rule (from mocked rules.json)
+        self.assertEqual(mock_match_rule.call_count, 2 * 1)
 
     @patch('rule_filter_client.apply_actions')
     @patch('rule_filter_client.match_rule')

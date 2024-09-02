@@ -34,7 +34,7 @@ def match_rule(email, conditions, match_all):
         field_value = headers.get(field, '')
 
         if field == 'received_at':
-            email_date = parser.parse(headers.get('date')).replace(tzinfo=None)
+            email_date = parser.parse(headers.get('date', '1')).replace(tzinfo=None)
             time_difference = parse_time_value(value)
 
             if predicate == 'is_less_than':
@@ -52,6 +52,8 @@ def match_rule(email, conditions, match_all):
             elif predicate == 'not_equals':
                 matches.append(value != field_value)
 
+    # NOTE: Can implement early termination for better performance (all -> exit on first False | any -> return on
+    # first True), current code is kept as it is for simplicity and can be optimized when application scales
     return all(matches) if match_all else any(matches)
 
 
@@ -60,10 +62,12 @@ def apply_actions(service, email_id, actions):
         # Supports mark as read / move to inbox, can be extended for more requirements
         for action in actions:
             body = {}
-            if action == 'mark_as_read':
-                body = {'removeLabelIds': ['UNREAD']}
+            if action.startswith('mark_as'):
+                if action.split('_')[-1].upper() == 'READ':
+                    body = {'removeLabelIds': ['UNREAD']}
+                else:
+                    body = {'addLabelIds': ['UNREAD']}
             elif action.startswith('move_to'):
-                # NOTE: Currently moves to inbox, can be converted to a variable/ENUM if more options are required
                 body = {'addLabelIds': [action.split('_')[-1].upper()]}
 
             service.users().messages().modify(

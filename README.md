@@ -5,7 +5,7 @@ Features currently supported:
 - Apply `Equal, Not Equals, Contains, Not Contains` filters based on string fields such as `Subject, from, to, Message etc`
 - Apply `Greater than or Less than` date based filter on `Date Received`, supports month and date.
 - Execute action for `Any match`, `All match` on defined rules
-- Possible Actions: `Mark as Read`, `Move to Category`.
+- Possible Actions: `Mark as read`/`Mark as unread`, `Move to Category`.
 - To move Category just use the correct category name after move_to_{category}: `move_to_inbox` -> Moves to Inbox | `move_to_starred` -> Moves to Starred.
 
 See [Examples Section](#Examples) for setting filters via [rules.json](rules.json)
@@ -48,7 +48,7 @@ Any one match where `from contains Reddit` or `subject contains Interview` shoul
 
 ```
 
-Both conditions should match `from contains Reddit` and `received_at less than 1 month` should execute the action `mark as read`
+Both conditions should match `from contains Reddit` and `received_at less than 1 month` should execute the action `mark as unread`
 ```json
 [
     {
@@ -59,7 +59,7 @@ Both conditions should match `from contains Reddit` and `received_at less than 1
                 {"field": "received_at", "predicate": "is_less_than", "value": "1month"}
             ]
         },
-        "actions": ["mark_as_read"]
+        "actions": ["mark_as_unread"]
     }
 ]
 

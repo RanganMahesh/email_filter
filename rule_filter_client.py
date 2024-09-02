@@ -1,17 +1,28 @@
 import json
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil import parser
 from gmail_client import authenticate_gmail_api
 
 
 def parse_headers(payload):
-    # Extract the headers and store them in a dictionary for easy of use
+    # Extract the headers and store them in a dictionary for easy use
     headers = {}
     for header in payload.get('headers', []):
         name = header['name'].lower()
         headers[name] = header['value']
     return headers
+
+
+def parse_time_value(value):
+    if 'day' in value:
+        days = int(value.replace('days', '').replace('day', '').strip())
+        return timedelta(days=days)
+    elif 'month' in value:
+        months = int(value.replace('months', '').replace('month', '').strip())
+        return timedelta(days=months * 30)  # Approximate month as 30 days
+    else:
+        raise ValueError(f"Unsupported time value: {value}")
 
 
 def match_rule(email, conditions, match_all):
@@ -22,15 +33,14 @@ def match_rule(email, conditions, match_all):
         field, predicate, value = condition['field'], condition['predicate'], condition['value']
         field_value = headers.get(field, '')
 
-        # Handle DateTime based filters, currently supports only dates
         if field == 'received_at':
-            email_date = parser.parse(headers.get('date', '0')).replace(tzinfo=None)
-            days_diff = (datetime.utcnow() - email_date).days
+            email_date = parser.parse(headers.get('date')).replace(tzinfo=None)
+            time_difference = parse_time_value(value)
 
             if predicate == 'is_less_than':
-                matches.append(days_diff < value)
+                matches.append(datetime.utcnow() - email_date < time_difference)
             elif predicate == 'is_greater_than':
-                matches.append(days_diff > value)
+                matches.append(datetime.utcnow() - email_date > time_difference)
 
         else:
             if predicate == 'contains':

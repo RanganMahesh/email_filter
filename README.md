@@ -3,10 +3,12 @@
 The Gmail Filter app enables you to manage your emails and apply automatic actions based on your customized filter conditions.
 Features currently supported:
 - Apply `Equal, Not Equals, Contains, Not Contains` filters based on string fields such as `Subject, from, to, Message etc`
-- Apply `Greater than or Less than` date based filter on `Date Received`
+- Apply `Greater than or Less than` date based filter on `Date Received`, supports month and date.
 - Execute action for `Any match`, `All match` on defined rules
 - Possible Actions: `Mark as Read`, `Move to Category`.
-- To move Category just use the correct category name after move_to_{category}: `move_to_inbox` -> Moves to Inbox | `move_to_starred` -> Moves to Starred. 
+- To move Category just use the correct category name after move_to_{category}: `move_to_inbox` -> Moves to Inbox | `move_to_starred` -> Moves to Starred.
+
+See [Examples Section](#Examples) for setting filters via [rules.json](rules.json)
 
 ## Getting started
 
@@ -27,6 +29,58 @@ If you are missing anything, follow [Creating the Client ID and Client Secret](h
 4. Set the rules in [rules.json](rules.json)
 5. `python rule_filter_client.py` To apply the rules and update the mail
 
+### Examples
+
+Any one match where `from contains Reddit` or `subject contains Interview` should execute the action `mark as read`
+```json
+[
+    {
+        "conditions": {
+            "match": "any",
+            "rules": [
+                {"field": "from", "predicate": "contains", "value": "Reddit"},
+                {"field": "subject", "predicate": "contains", "value": "Interview"}
+            ]
+        },
+        "actions": ["mark_as_read"]
+    }
+]
+
+```
+
+Both conditions should match `from contains Reddit` and `received_at less than 1 month` should execute the action `mark as read`
+```json
+[
+    {
+        "conditions": {
+            "match": "all",
+            "rules": [
+                {"field": "from", "predicate": "contains", "value": "Reddit"},
+                {"field": "received_at", "predicate": "is_less_than", "value": "1month"}
+            ]
+        },
+        "actions": ["mark_as_read"]
+    }
+]
+
+```
+
+Any one match `from contains Reddit` or `received_at less than 10 days` should execute the actions: `move to starred` and `mark as read`
+```json
+[
+    {
+        "conditions": {
+            "match": "any",
+            "rules": [
+                {"field": "from", "predicate": "contains", "value": "Reddit"},
+                {"field": "received_at", "predicate": "is_less_than", "value": "10days"}
+            ]
+        },
+        "actions": ["move_to_starred", "mark_as_read"]
+    }
+]
+
+```
 
 ### Development and Testing
 

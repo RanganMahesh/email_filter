@@ -25,26 +25,52 @@ class TestParseHeaders(unittest.TestCase):
 class TestMatchRule(unittest.TestCase):
 
     @patch('rule_filter_client.parser.parse')
-    def test_received_at_greater_than(self, mock_parse):
+    def test_received_at_greater_than_days(self, mock_parse):
         mock_parse.return_value = datetime.now() - timedelta(days=10)
 
         email = {
             'payload': '{"headers": [{"name": "Date", "value": "Sat, 31 Aug 2024 15:44:49 +0000"}]}'
         }
-        conditions = [{'field': 'received_at', 'predicate': 'is_greater_than', 'value': 5}]
+        conditions = [{'field': 'received_at', 'predicate': 'is_greater_than', 'value': '5days'}]
         match_all = True
 
         result = match_rule(email, conditions, match_all)
         self.assertTrue(result)
 
     @patch('rule_filter_client.parser.parse')
-    def test_received_at_less_than(self, mock_parse):
+    def test_received_at_less_than_days(self, mock_parse):
         mock_parse.return_value = datetime.now() - timedelta(days=1)
 
         email = {
             'payload': '{"headers": [{"name": "Date", "value": "Sat, 31 Aug 2024 15:44:49 +0000"}]}'
         }
-        conditions = [{'field': 'received_at', 'predicate': 'is_less_than', 'value': 5}]
+        conditions = [{'field': 'received_at', 'predicate': 'is_less_than', 'value': '5days'}]
+        match_all = True
+
+        result = match_rule(email, conditions, match_all)
+        self.assertTrue(result)
+
+    @patch('rule_filter_client.parser.parse')
+    def test_received_at_greater_than_months(self, mock_parse):
+        mock_parse.return_value = datetime.now() - timedelta(days=60)
+
+        email = {
+            'payload': '{"headers": [{"name": "Date", "value": "Sat, 01 Jul 2024 15:44:49 +0000"}]}'
+        }
+        conditions = [{'field': 'received_at', 'predicate': 'is_greater_than', 'value': '1month'}]
+        match_all = True
+
+        result = match_rule(email, conditions, match_all)
+        self.assertTrue(result)
+
+    @patch('rule_filter_client.parser.parse')
+    def test_received_at_less_than_months(self, mock_parse):
+        mock_parse.return_value = datetime.now() - timedelta(days=15)
+
+        email = {
+            'payload': '{"headers": [{"name": "Date", "value": "Sat, 01 Jul 2024 15:44:49 +0000"}]}'
+        }
+        conditions = [{'field': 'received_at', 'predicate': 'is_less_than', 'value': '2months'}]
         match_all = True
 
         result = match_rule(email, conditions, match_all)

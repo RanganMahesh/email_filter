@@ -8,18 +8,18 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from rule_filter_client import match_rule
 
 
-def authenticate_gmail_api(scopes):
+def authenticate_gmail_api(token_file, scopes):
     try:
         creds = None
-        if os.path.exists('token.json'):
-            creds = Credentials.from_authorized_user_file('token.json', scopes)
+        if os.path.exists(token_file):
+            creds = Credentials.from_authorized_user_file(token_file, scopes)
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
                 flow = InstalledAppFlow.from_client_secrets_file('credentials.json', scopes)
                 creds = flow.run_local_server(port=0)
-            with open('token.json', 'w') as token:
+            with open(token_file, 'w') as token:
                 token.write(creds.to_json())
         return creds.token
 
@@ -54,7 +54,7 @@ def apply_rules():
     with open('rules.json', 'r') as f:
         rules = json.load(f)
 
-    service = authenticate_gmail_api(['https://www.googleapis.com/auth/gmail.modify'])
+    service = authenticate_gmail_api('write_token.json', ['https://www.googleapis.com/auth/gmail.modify'])
     conn = sqlite3.connect('emails.db')
     c = conn.cursor()
     for row in c.execute('SELECT * FROM emails'):

@@ -12,10 +12,10 @@ class TestAuthenticateGmailAPI(unittest.TestCase):
         mock_exists.return_value = True
         mock_from_authorized_user_file.return_value = MagicMock()
 
-        authenticate_gmail_api(['https://www.googleapis.com/auth/gmail.readonly'])
+        authenticate_gmail_api('read_token.json',['https://www.googleapis.com/auth/gmail.readonly'])
 
-        mock_exists.assert_called_once_with('token.json')
-        mock_from_authorized_user_file.assert_called_once_with('token.json',
+        mock_exists.assert_called_once_with('read_token.json')
+        mock_from_authorized_user_file.assert_called_once_with('read_token.json',
                                                                ['https://www.googleapis.com/auth/gmail.readonly'])
 
     @patch('gmail_client.os.path.exists')
@@ -32,7 +32,7 @@ class TestAuthenticateGmailAPI(unittest.TestCase):
         mock_request_instance = MagicMock()
         mock_request.return_value = mock_request_instance
 
-        authenticate_gmail_api(['https://www.googleapis.com/auth/gmail.readonly'])
+        authenticate_gmail_api('read_token.json',['https://www.googleapis.com/auth/gmail.readonly'])
 
         mock_creds.refresh.assert_called_once_with(mock_request_instance)
 
@@ -49,7 +49,7 @@ class TestAuthenticateGmailAPI(unittest.TestCase):
         mock_flow = MagicMock()
         mock_from_client_secrets_file.return_value = mock_flow
 
-        authenticate_gmail_api(['https://www.googleapis.com/auth/gmail.readonly'])
+        authenticate_gmail_api('read_token.json',['https://www.googleapis.com/auth/gmail.readonly'])
 
         mock_from_client_secrets_file.assert_called_once_with('credentials.json',
                                                               ['https://www.googleapis.com/auth/gmail.readonly'])
@@ -65,7 +65,7 @@ class TestAuthenticateGmailAPI(unittest.TestCase):
         mock_from_authorized_user_file.side_effect = Exception("Error loading token")
         mock_from_client_secrets_file.side_effect = Exception("Error creating flow")
 
-        service = authenticate_gmail_api(['https://www.googleapis.com/auth/gmail.readonly'])
+        service = authenticate_gmail_api('read_token.json',['https://www.googleapis.com/auth/gmail.readonly'])
 
         self.assertIsNone(service)
 
@@ -79,7 +79,7 @@ class TestAuthenticateGmailAPI(unittest.TestCase):
         mock_creds.valid = True
         mock_from_authorized_user_file.return_value = mock_creds
 
-        authenticate_gmail_api(['https://www.googleapis.com/auth/gmail.readonly'])
+        authenticate_gmail_api('read_token.json',['https://www.googleapis.com/auth/gmail.readonly'])
 
         mock_build.assert_called_once_with('gmail', 'v1', credentials=mock_creds)
 
@@ -95,7 +95,7 @@ class TestAuthenticateGmailAPI(unittest.TestCase):
         mock_from_authorized_user_file.return_value = mock_creds
         mock_build.side_effect = Exception("Error building service")
 
-        service = authenticate_gmail_api(['https://www.googleapis.com/auth/gmail.readonly'])
+        service = authenticate_gmail_api('read_token.json',['https://www.googleapis.com/auth/gmail.readonly'])
 
         self.assertIsNone(service)
 
@@ -109,7 +109,7 @@ class TestFetchEmails(unittest.TestCase):
 
         fetch_emails()
 
-        mock_authenticate_gmail_api.assert_called_once_with(['https://www.googleapis.com/auth/gmail.readonly'])
+        mock_authenticate_gmail_api.assert_called_once_with('read_token.json', ['https://www.googleapis.com/auth/gmail.readonly'])
 
     @patch('gmail_client.authenticate_gmail_api')
     def test_list_and_get_called(self, mock_authenticate_gmail_api):

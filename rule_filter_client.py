@@ -52,9 +52,9 @@ def apply_actions(service, email_id, actions):
             body = {}
             if action == 'mark_as_read':
                 body = {'removeLabelIds': ['UNREAD']}
-            elif action == 'move_to_inbox':
+            elif action.startswith('move_to'):
                 # NOTE: Currently moves to inbox, can be converted to a variable/ENUM if more options are required
-                body = {'addLabelIds': ['INBOX']}
+                body = {'addLabelIds': [action.split('_')[-1].upper()]}
 
             service.users().messages().modify(
                 userId='me',
@@ -71,7 +71,7 @@ def apply_rules():
         rules = json.load(f)
 
     # Reuse authentication from other script with a different scope to allow updates
-    service = authenticate_gmail_api(['https://www.googleapis.com/auth/gmail.modify'])
+    service = authenticate_gmail_api('write_token.json', ['https://www.googleapis.com/auth/gmail.modify'])
     conn = sqlite3.connect('emails.db')
     c = conn.cursor()
 

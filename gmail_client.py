@@ -7,13 +7,13 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 import sqlite3
 
 
-def authenticate_gmail_api(scope):
+def authenticate_gmail_api(token_file, scope):
     try:
         creds = None
 
         # NOTE: Tokens should not be stored without encryption directly, this is followed only for simplicity.
-        if os.path.exists('token.json'):
-            creds = Credentials.from_authorized_user_file('token.json', scope)
+        if os.path.exists(token_file):
+            creds = Credentials.from_authorized_user_file(token_file, scope)
 
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
@@ -23,7 +23,7 @@ def authenticate_gmail_api(scope):
                 creds = flow.run_local_server(port=0, prompt='consent')
 
             # Reuse the token in the next call
-            with open('token.json', 'w') as token:
+            with open(token_file, 'w') as token:
                 token.write(creds.to_json())
 
     except Exception as e:
@@ -41,7 +41,7 @@ def authenticate_gmail_api(scope):
 def fetch_emails():
     email_data = []
     # NOTE: ReadOnly should suffice to fetch the emails
-    gmail_service = authenticate_gmail_api(['https://www.googleapis.com/auth/gmail.readonly'])
+    gmail_service = authenticate_gmail_api('read_token.json', ['https://www.googleapis.com/auth/gmail.readonly'])
     try:
         # NOTE: Emails fetched currently capped at 10, change maxResults accordingly
         results = gmail_service.users().messages().list(userId='me', maxResults=10, q='').execute()

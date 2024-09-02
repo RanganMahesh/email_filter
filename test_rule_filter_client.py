@@ -160,8 +160,9 @@ class TestApplyActions(unittest.TestCase):
 
 class TestApplyRules(unittest.TestCase):
 
+    @patch('rule_filter_client.authenticate_gmail_api')
     @patch('rule_filter_client.open', new_callable=mock_open, read_data='[{"conditions": {"match": "all", "rules": []}, "actions": []}]')
-    def test_rules_json_accessed(self, mock_open_file):
+    def test_rules_json_accessed(self, mock_open_file, mock_authenticate_gmail_api):
         apply_rules()
         mock_open_file.assert_called_once_with('rules.json', 'r')
 
@@ -169,11 +170,12 @@ class TestApplyRules(unittest.TestCase):
     @patch('rule_filter_client.open', new_callable=mock_open, read_data='[{"conditions": {"match": "all", "rules": []}, "actions": []}]')
     def test_authenticate_gmail_api_called(self, mock_open_file, mock_authenticate_gmail_api):
         apply_rules()
-        mock_authenticate_gmail_api.assert_called_once_with(['https://www.googleapis.com/auth/gmail.modify'])
+        mock_authenticate_gmail_api.assert_called_once_with('write_token.json', ['https://www.googleapis.com/auth/gmail.modify'])
 
+    @patch('rule_filter_client.authenticate_gmail_api')
     @patch('rule_filter_client.sqlite3.connect')
     @patch('rule_filter_client.open', new_callable=mock_open, read_data='[{"conditions": {"match": "all", "rules": []}, "actions": []}]')
-    def test_sqlite_called(self, mock_open_file, mock_sqlite_connect):
+    def test_sqlite_called(self, mock_open_file, mock_sqlite_connect, mock_authenticate_gmail_api):
         mock_conn = MagicMock()
         mock_sqlite_connect.return_value = mock_conn
         apply_rules()
@@ -181,10 +183,11 @@ class TestApplyRules(unittest.TestCase):
         mock_conn.cursor.assert_called_once()
         mock_conn.close.assert_called_once()
 
+    @patch('rule_filter_client.authenticate_gmail_api')
     @patch('rule_filter_client.match_rule')
     @patch('rule_filter_client.sqlite3.connect')
     @patch('rule_filter_client.open', new_callable=mock_open, read_data='[{"conditions": {"match": "all", "rules": []}, "actions": []}]')
-    def test_match_rule_called_correct_times(self, mock_open_file, mock_sqlite_connect, mock_match_rule):
+    def test_match_rule_called_correct_times(self, mock_open_file, mock_sqlite_connect, mock_match_rule, mock_authenticate_gmail_api):
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
         mock_sqlite_connect.return_value = mock_conn
